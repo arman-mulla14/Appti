@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MCA-Websoftera Event Aptitude Test</title>
+    <!-- Load Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome for modern icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+
+    <style>
+      /* Custom CSS variables for color consistency */
+      :root {
+        --primary-color: #4f46e5; /* Indigo-600 (Primary Action) */
+        --primary-light: #6366f1; /* Indigo-500 */
+        --primary-dark: #3730a3; /* Indigo-800 */
+        --success-color: #10b981; /* Emerald-500 (PASS/Correct) */
+        --warning-color: #f59e0b; /* Amber-500 (FAIL/Not Eligible - Replaced Red) */
+        --wrong-answer-color: #0284c7; /* Sky-600 (Wrong Answer Highlight - Replaced Red) */
+        --answered-border: #10b981;
+      }
+
+      /* Apply Inter font globally and set up the background */
+      body {
+        font-family: "Inter", sans-serif;
+        /* Soft, attractive background gradient */
+        background: linear-gradient(135deg, #f0f4ff 0%, #dbeafe 100%);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 10vh;
+        padding: 1.5rem 1rem;
+      }
+
+      /* Modernized Main Action Button Styling (Start/Submit/Review) */
+      .main-action-btn {
+        background-image: linear-gradient(
+          to right,
+          var(--primary-light),
+          var(--primary-color)
+        );
+        box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+        transition: all 0.3s ease;
+      }
+      .main-action-btn:hover {
+        background-image: linear-gradient(
+          to right,
+          var(--primary-color),
+          var(--primary-dark)
+        );
+        transform: scale(1.01);
+        box-shadow: 0 12px 25px -5px rgba(79, 70, 229, 0.6);
+      }
+
+      /* Highlight selected option: Clear border and background change */
+      .option-selected {
+        border-color: var(--primary-color) !important;
+        background-color: #eef2ff !important; /* Indigo-50 */
+        color: var(--primary-color) !important;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); /* Ring effect */
+        font-weight: 600 !important;
+      }
+
+      /* Question card styling when answered */
+      .card-answered {
+        border-left: 6px solid var(--answered-border) !important;
+        box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.1),
+          0 5px 10px -3px rgba(0, 0, 0, 0.05); /* Deeper shadow */
+      }
+
+      /* --- Review View Styles --- */
+
+      /* Highlight the Correct Answer (Green) */
+      .option-correct {
+        border-color: var(--success-color) !important;
+        background-color: #ecfdf5 !important; /* Green-50 */
+        color: var(--success-color) !important;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+        font-weight: 700 !important;
+      }
+
+      /* Highlight the User's Wrong Answer (Blue - Replaced Red) */
+      .option-wrong {
+        border-color: var(--wrong-answer-color) !important;
+        background-color: #f0f9ff !important; /* Sky-50 */
+        color: var(--wrong-answer-color) !important;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.3);
+        font-weight: 700 !important;
+      }
+
+      /* --- Result View Styles: Single Score Box --- */
+      .single-score-box {
+        transition: all 0.3s ease-in-out;
+        @apply p-8 rounded-3xl shadow-2xl text-white font-extrabold;
+      }
+      .single-score-box.pass {
+        background-image: linear-gradient(
+          to right,
+          #10b981,
+          #059669
+        ); /* Emerald Gradient */
+        box-shadow: 0 15px 30px -5px rgba(16, 185, 129, 0.5);
+      }
+      /* FAIL/Not Eligible box now uses AMBER/ORANGE */
+      .single-score-box.fail {
+        background-image: linear-gradient(
+          to right,
+          #fcd34d,
+          #d97706
+        ); /* Amber-300 to Amber-700 Gradient */
+        box-shadow: 0 15px 30px -5px rgba(245, 158, 11, 0.4);
+      }
+      .score-number {
+        font-size: 5rem; /* Large number */
+        line-height: 1;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      }
+      .score-divisor {
+        font-size: 2rem;
+        opacity: 0.8;
+      }
+      .score-denominator {
+        font-size: 3rem;
+        opacity: 0.9;
+      }
+
+      /* Sticky Navigator (Desktop) */
+      #question-navigator-sidebar {
+        position: sticky;
+        top: 1.5rem;
+        align-self: flex-start;
+        max-height: calc(100vh - 3rem);
+      }
+
+      /* Mobile Progress Button Pill Styling */
+      #toggle-nav-btn {
+        transition: all 0.2s ease-in-out;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-image: linear-gradient(
+          45deg,
+          var(--primary-light),
+          var(--primary-dark)
+        );
+        box-shadow: 0 8px 15px -4px rgba(79, 70, 229, 0.6);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Main Application Container -->
+    <div
+      id="app-container"
+      class="w-full max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] transition-all duration-300 border-t-4 border-indigo-200"
+    >
+      <h1
+        class="text-3xl font-black text-center text-gray-800 mb-8 border-b-4 border-indigo-100 pb-4 text-indigo-700"
+      >
+        MCA-Websoftera Event Aptitude Test💻
+      </h1>
+
+      <!-- 1. Login View -->
+      <div
+        id="login-view"
+        class="view p-6 md:p-10 bg-gray-50 rounded-2xl shadow-inner border border-gray-100"
+      >
+        <p class="text-gray-600 mb-8 text-center text-xl font-medium">
+          Please enter your name to begin the assessment.
+        </p>
+        <input
+          type="text"
+          id="candidate-name-input"
+          placeholder="Your Full Name"
+          class="w-full p-5 border border-gray-300 rounded-xl text-lg focus:outline-none focus:ring-4 focus:ring-indigo-300 mb-6 shadow-md transition duration-200"
+        />
+        <button
+          onclick="startTest()"
+          class="w-full py-5 text-white text-xl font-extrabold rounded-xl main-action-btn"
+        >
+          Start Test Now <i class="fas fa-arrow-right ml-2"></i>
+        </button>
+        <p
+          id="name-error"
+          class="text-red-500 mt-3 hidden text-sm text-center font-medium"
+        >
+          Name cannot be empty. Please enter your name.
+        </p>
+      </div>
+
+      <!-- 2. Test View -->
+      <div id="test-view" class="view hidden">
+        <div
+          class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4"
+        >
+          <p class="text-xl font-bold text-gray-700 mb-2 sm:mb-0">
+            Candidate:
+            <span
+              id="display-candidate-name"
+              class="text-indigo-600 font-extrabold"
+            ></span>
+          </p>
+          <p
+            class="text-lg font-semibold text-gray-500 bg-indigo-50 px-4 py-2 rounded-full text-indigo-700 border border-indigo-300 shadow-md"
+          >
+            Total Questions:
+            <span id="total-q-count" class="font-bold">20</span>
+          </p>
+        </div>
+
+        <!-- Main Content Area: Questions List + Sticky Navigator (Desktop) -->
+        <div class="flex flex-col md:flex-row gap-8">
+          <!-- Questions List Container (Scrollable) -->
+          <div id="questions-list-container" class="w-full md:w-3/4 space-y-8">
+            <!-- Individual Question Cards will be rendered here -->
+          </div>
+
+          <!-- Sticky Question Navigator Sidebar (Desktop Only) -->
+          <div
+            id="question-navigator-sidebar"
+            class="w-full md:w-1/4 p-5 bg-indigo-50 rounded-2xl shadow-2xl border border-indigo-200 hidden md:block"
+          >
+            <h3 class="text-xl font-bold mb-4 text-indigo-700 border-b pb-2">
+              Question Index
+            </h3>
+            <div id="navigator-grid-desktop" class="grid grid-cols-4 gap-3">
+              <!-- Buttons rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button at the bottom of the list -->
+        <div class="mt-10 pt-6 border-t border-gray-300">
+          <button
+            id="submit-btn"
+            onclick="submitTest()"
+            class="w-full px-5 py-4 bg-green-600 text-white text-xl font-bold rounded-xl hover:bg-green-700 transition duration-150 shadow-xl shadow-green-400/70 transform hover:scale-[1.005]"
+          >
+            <i class="fas fa-check-circle mr-2"></i> Submit Test & Finish
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. Result View -->
+      <div
+        id="result-view"
+        class="view hidden text-center p-10 rounded-3xl border-4 transition-all duration-300 shadow-2xl"
+      >
+        <h2 class="text-4xl font-extrabold mb-4" id="result-title"></h2>
+        <p class="text-gray-700 text-xl mb-6">
+          Candidate:
+          <span
+            id="final-candidate-name"
+            class="font-extrabold text-indigo-600"
+          ></span>
+        </p>
+
+        <!-- Single Metric Box for Final Score and Percentage -->
+        <div id="single-score-box" class="single-score-box mx-auto max-w-md">
+          <i id="status-icon" class="mb-4 text-6xl opacity-90"></i>
+          <p class="text-lg font-semibold opacity-80 mb-4">
+            Required Pass Percentage: <span class="font-bold">70%</span>
+          </p>
+
+          <p class="text-3xl font-extrabold mb-1">Final Score</p>
+          <div class="flex justify-center items-baseline mb-4">
+            <span id="final-score-metric-num" class="score-number">0</span>
+            <span class="score-divisor">/</span>
+            <span id="final-score-metric-total" class="score-denominator"
+              >20</span
+            >
+          </div>
+
+          <p
+            class="text-xl font-extrabold border-t border-white border-opacity-30 pt-4 mt-4"
+          >
+            Overall Percentage:
+            <span id="final-percentage" class="text-4xl font-black ml-2"
+              >0%</span
+            >
+          </p>
+        </div>
+
+        <!-- Button to initiate review --><button
+          onclick="reviewAnswers()"
+          class="w-full px-8 py-3 text-white font-bold text-lg rounded-xl main-action-btn mt-8 transform hover:scale-[1.005]"
+        >
+          <i class="fas fa-search-plus mr-2"></i> Review My Answers & Score
+          Breakdown
+        </button>
+
+        <button
+          onclick="resetApp()"
+          class="w-full px-8 py-3 text-white font-bold text-lg rounded-xl bg-gray-600 hover:bg-gray-700 transition duration-150 mt-4"
+        >
+          <i class="fas fa-undo-alt mr-2"></i> Take Another Test
+        </button>
+      </div>
+
+      <!-- 4. Review View -->
+      <div id="review-view" class="view hidden">
+        <h2 class="text-3xl font-extrabold mb-6 text-indigo-700 border-b pb-3">
+          Test Review Details
+        </h2>
+
+        <!-- Hidden Score Breakdown for Review Mode -->
+        <div id="score-breakdown" class="my-8 space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <!-- Correct Answers Metric (Green) -->
+            <div
+              class="p-4 rounded-xl shadow-lg bg-green-50 border-2 border-green-300"
+            >
+              <i class="fas fa-check-circle text-green-600 text-2xl mb-1"></i>
+              <p class="text-sm font-semibold text-green-700">
+                Correct Answers
+              </p>
+              <span
+                id="final-correct"
+                class="text-4xl font-black text-green-700"
+                >0</span
+              >
+            </div>
+
+            <!-- Wrong Answers Metric (Blue - Replaced Red) -->
+            <div
+              class="p-4 rounded-xl shadow-lg bg-sky-50 border-2 border-sky-300"
+            >
+              <i class="fas fa-times-circle text-sky-600 text-2xl mb-1"></i>
+              <p class="text-sm font-semibold text-sky-700">Wrong Answers</p>
+              <span id="final-wrong" class="text-4xl font-black text-sky-700"
+                >0</span
+              >
+            </div>
+
+            <!-- Unanswered Questions Metric (Amber) -->
+            <div
+              class="p-4 rounded-xl shadow-lg bg-amber-50 border-2 border-amber-300"
+            >
+              <i
+                class="fas fa-question-circle text-amber-600 text-2xl mb-1"
+              ></i>
+              <p class="text-sm font-semibold text-amber-700">Unanswered</p>
+              <span
+                id="final-unanswered"
+                class="text-4xl font-black text-amber-700"
+                >0</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <p class="text-lg text-gray-600 mb-8">
+          Your selections are shown below.
+          <span class="text-green-600 font-bold">Correct Answers</span> and your
+          <span class="text-sky-600 font-bold">Wrong Answers</span> are
+          highlighted.
+        </p>
+
+        <div id="review-questions-container" class="space-y-10">
+          <!-- Review Cards rendered here -->
+        </div>
+
+        <button
+          onclick="showView('result')"
+          class="w-full px-5 py-4 bg-indigo-600 text-white text-xl font-bold rounded-xl hover:bg-indigo-700 transition duration-150 shadow-xl mt-10 transform hover:scale-[1.005]"
+        >
+          <i class="fas fa-arrow-left mr-2"></i> Back to Results Summary
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigator Drawer -->
+    <div
+      id="mobile-navigator-drawer"
+      class="fixed inset-0 z-40 bg-gray-900 bg-opacity-80 hidden md:hidden transition-opacity duration-300 opacity-0 pointer-events-none"
+      onclick="toggleMobileNavigator(false)"
+    >
+      <div
+        class="absolute right-0 top-0 bottom-0 w-full xs:w-3/4 sm:w-1/2 bg-white p-6 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out rounded-l-2xl"
+        onclick="event.stopPropagation()"
+      >
+        <h3 class="text-2xl font-bold mb-4 text-indigo-700 border-b pb-2">
+          Question Index
+        </h3>
+        <p class="text-sm text-gray-500 mb-6">
+          Tap on a number to jump to that question.
+        </p>
+        <div
+          id="navigator-grid-mobile"
+          class="grid grid-cols-5 gap-3 overflow-y-auto h-[80%] pb-4"
+        >
+          <!-- Buttons rendered by JS -->
+        </div>
+        <button
+          onclick="toggleMobileNavigator(false)"
+          class="mt-4 w-full py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition duration-150 transform hover:scale-[1.005]"
+        >
+          <i class="fas fa-times-circle mr-2"></i> Close Index
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Progress Button (Fixed on screen) --><button
+      id="toggle-nav-btn"
+      onclick="toggleMobileNavigator(true)"
+      class="md:hidden fixed bottom-6 right-6 z-50 text-white font-extrabold rounded-full transform hover:scale-105"
+    >
+      <i class="fas fa-list-ol text-xl"></i>
+      <span class="text-xl">
+        <span id="mobile-q-answered">0</span>/<span id="mobile-q-total"
+          >20</span
+        >
+      </span>
+    </button>
+
+    <script>
+      // --- CONSTANTS ---
+      const PASS_THRESHOLD_PERCENTAGE = 70;
+      const questions = [
+        {
+          id: 1,
+          question:
+            "Which of the following is the correct HTML element for the largest heading?",
+          options: ["<h1>", "<h6>", "<heading>", "<head>"],
+          answer: "<h1>",
+        },
+        {
+          id: 2,
+          question: "What does CSS stand for?",
+          options: [
+            "Creative Style Sheets",
+            "Colorful Style Sheets",
+            "Cascading Style Sheets",
+            "Computer Style Sheets",
+          ],
+          answer: "Cascading Style Sheets",
+        },
+        {
+          id: 3,
+          question:
+            "Which of the following is the correct way to select an element with the id logo in CSS?",
+          options: ["#logo", ".logo", "logo", "*logo"],
+          answer: "#logo",
+        },
+        {
+          id: 4,
+          question:
+            "Which of the following is a valid way to declare an array in JavaScript?",
+          options: [
+            "let arr = [1,2,3];",
+            "int arr = [1,2,3];",
+            "array arr = (1,2,3);",
+            "var arr = int[3];",
+          ],
+          answer: "let arr = [1,2,3];",
+        },
+        {
+          id: 5,
+          question: "What does HTML stand for?",
+          options: [
+            "Hyper text markup language",
+            "Hyper transfer markup language",
+            "High tech modern language",
+            "Hyperlink test management language",
+          ],
+          answer: "Hyper text markup language",
+        },
+        {
+          id: 6,
+          question: "How do you create a comment in HTML?",
+          options: [
+            "<!-- comment -->",
+            "#comment",
+            "//comment",
+            "/*comment */",
+          ],
+          answer: "<!-- comment -->",
+        },
+        {
+          id: 7,
+          question:
+            "Which symbol is used for single-line comments in JavaScript?",
+          options: [
+            "<!-- comment -->",
+            "#comment",
+            "// comment",
+            "/* comment */",
+          ],
+          answer: "// comment",
+        },
+        {
+          id: 8,
+          question: "Which of the following is NOT a JavaScript data type?",
+          options: ["number", "string", "boolean", "character"],
+          answer: "character",
+        },
+        {
+          id: 9,
+          question: "What is the purpose of the <table> tag in HTML?",
+          options: [
+            "to create a table",
+            "to create a form",
+            "to create a link",
+            "to create an image",
+          ],
+          answer: "to create a table",
+        },
+        {
+          id: 10,
+          question: "What is the purpose of the margin property in CSS?",
+          options: [
+            "To add space between elements",
+            "To add space within an element",
+            "To change the font size",
+            "To change the background colour",
+          ],
+          answer: "To add space between elements",
+        },
+        {
+          id: 11,
+          question: "What should be the first tag in any HTML document?",
+          options: ["<!DOCTYPE html>", "<head>", "<title>", "<html>"],
+          answer: "<!DOCTYPE html>",
+        },
+        {
+          id: 12,
+          question: "How can you create an email link?",
+          options: [
+            '<a href="mailto:xxx@yyy">',
+            '<a href="xxx@yyy">',
+            "<mail>xxx@yyy",
+            '<mail href="xxx@yyy">',
+          ],
+          answer: '<a href="mailto:xxx@yyy">',
+        },
+        {
+          id: 13,
+          question:
+            "What is the correct way to define a function named calculateSum that takes two parameters, a and b, in JavaScript?",
+          options: [
+            "function calculateSum(a, b) { return a + b; }",
+            "def calculateSum(a, b): return a + b",
+            "function calculateSum(a, b) { a + b; }",
+            "calculateSum(a, b) => a + b",
+          ],
+          answer: "function calculateSum(a, b) { return a + b; }",
+        },
+        {
+          id: 14,
+          question:
+            "Which built-in JavaScript array method is used to add one or more elements to the end of an array and returns the new length of the array?",
+          options: ["push", "pop", "shift", "unshift"],
+          answer: "push",
+        },
+        {
+          id: 15,
+          question:
+            "Which keyword is used to declare a variable that cannot be reassigned (has a constant value) in JavaScript?",
+          options: ["const", "let", "var", "static"],
+          answer: "const",
+        },
+        {
+          id: 16,
+          question:
+            "Which of the following is the correct HTML5 doctype declaration?",
+          options: [
+            "<!DOCTYPE html>",
+            '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">',
+            "<!DOCTYPE h5>",
+            "<DOCTYPE html>",
+          ],
+          answer: "<!DOCTYPE html>",
+        },
+        {
+          id: 17,
+          question:
+            "What is the correct CSS syntax for making all <h1> elements red?",
+          options: [
+            "h1 { color: red; }",
+            "h1 { text-color: red; }",
+            "h1 { background-color: red; }",
+            "h1 { font-color: red; }",
+          ],
+          answer: "h1 { color: red; }",
+        },
+        {
+          id: 18,
+          question: "Which CSS property is used to control the text size?",
+          options: ["font-weight", "font-family", "font-size", "text-size"],
+          answer: "font-size",
+        },
+        {
+          id: 19,
+          question: "Which tag is used to create a line break in HTML?",
+          options: ["<lb>", "<break>", "<br>", "<newline>"],
+          answer: "<br>",
+        },
+        {
+          id: 20,
+          question: "What is the correct HTML element to display an image?",
+          options: ["<img>", "<image>", "<picture>", "<src>"],
+          answer: "<img>",
+        },
+      ];
+
+      // --- STATE MANAGEMENT & DOM REFERENCES ---
+      let userAnswers = {};
+      let candidateName = "";
+      let resultMetrics = { correct: 0, wrong: 0, unanswered: 0 };
+
+      const views = {
+        login: document.getElementById("login-view"),
+        test: document.getElementById("test-view"),
+        result: document.getElementById("result-view"),
+        review: document.getElementById("review-view"),
+      };
+      const nameInput = document.getElementById("candidate-name-input");
+      const nameError = document.getElementById("name-error");
+      const displayCandidateName = document.getElementById(
+        "display-candidate-name"
+      );
+      const totalQCount = document.getElementById("total-q-count");
+      const questionsListContainer = document.getElementById(
+        "questions-list-container"
+      );
+
+      const navigatorGridDesktop = document.getElementById(
+        "navigator-grid-desktop"
+      );
+      const navigatorGridMobile = document.getElementById(
+        "navigator-grid-mobile"
+      );
+      const mobileNavigatorDrawer = document.getElementById(
+        "mobile-navigator-drawer"
+      );
+      const mobileQAnswered = document.getElementById("mobile-q-answered");
+      const mobileQTotal = document.getElementById("mobile-q-total");
+
+      // Result elements
+      const singleScoreBox = document.getElementById("single-score-box");
+      const finalScoreMetricNum = document.getElementById(
+        "final-score-metric-num"
+      );
+      const finalScoreMetricTotal = document.getElementById(
+        "final-score-metric-total"
+      );
+      const statusIcon = document.getElementById("status-icon");
+
+      const finalCorrectElement = document.getElementById("final-correct");
+      const finalWrongElement = document.getElementById("final-wrong");
+      const finalUnansweredElement =
+        document.getElementById("final-unanswered");
+
+      const TOTAL_QUESTIONS = questions.length;
+      totalQCount.textContent = TOTAL_QUESTIONS;
+      mobileQTotal.textContent = TOTAL_QUESTIONS;
+      finalScoreMetricTotal.textContent = TOTAL_QUESTIONS;
+
+      // --- VIEW CONTROL ---
+
+      function showView(viewName) {
+        Object.values(views).forEach((view) => view.classList.add("hidden"));
+        views[viewName].classList.remove("hidden");
+        // Show/Hide the floating mobile button only in the 'test' view
+        document
+          .getElementById("toggle-nav-btn")
+          .classList.toggle("hidden", viewName !== "test");
+        // Scroll to top when view changes
+        window.scrollTo(0, 0);
+      }
+
+      function toggleMobileNavigator(show) {
+        const drawerContent = mobileNavigatorDrawer.querySelector("div");
+
+        if (show) {
+          mobileNavigatorDrawer.classList.remove(
+            "hidden",
+            "opacity-0",
+            "pointer-events-none"
+          );
+          mobileNavigatorDrawer.classList.add("flex", "opacity-100");
+          setTimeout(() => {
+            drawerContent.classList.remove("translate-x-full");
+          }, 10);
+        } else {
+          drawerContent.classList.add("translate-x-full");
+          setTimeout(() => {
+            mobileNavigatorDrawer.classList.add(
+              "hidden",
+              "opacity-0",
+              "pointer-events-none"
+            );
+          }, 300);
+        }
+      }
+
+      // --- CORE FUNCTIONALITY ---
+
+      function initApp() {
+        showView("login");
+      }
+
+      function startTest() {
+        candidateName = nameInput.value.trim();
+        if (candidateName === "") {
+          nameError.classList.remove("hidden");
+          return;
+        }
+        nameError.classList.add("hidden");
+
+        displayCandidateName.textContent = candidateName;
+
+        showView("test");
+        renderAllQuestions();
+        renderNavigator();
+      }
+
+      /**
+       * Creates an individual question card element for the Test View.
+       */
+      function createQuestionCard(q, index) {
+        const qId = q.id;
+        const displayNum = index + 1;
+
+        const card = document.createElement("div");
+        card.id = `q-${qId}`;
+        card.className =
+          "question-card bg-white p-6 rounded-2xl shadow-xl border border-gray-100 transition duration-300";
+
+        const heading = document.createElement("h3");
+        heading.className =
+          "text-base font-semibold text-indigo-500 mb-4 border-b border-indigo-100 pb-2";
+        heading.textContent = `Question ${displayNum} of ${TOTAL_QUESTIONS}`;
+        card.appendChild(heading);
+
+        const text = document.createElement("p");
+        text.className =
+          "text-xl md:text-2xl font-extrabold text-gray-800 mb-6 leading-relaxed";
+        text.textContent = `${displayNum}. ${q.question}`;
+        card.appendChild(text);
+
+        const optionsDiv = document.createElement("div");
+        optionsDiv.className = "space-y-4";
+
+        q.options.forEach((option) => {
+          const optionBtn = document.createElement("button");
+          optionBtn.type = "button";
+          optionBtn.textContent = option;
+          optionBtn.className =
+            "w-full text-left p-4 border-2 border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-indigo-50 hover:border-indigo-400 transition duration-150 cursor-pointer focus:outline-none shadow-sm";
+
+          optionBtn.onclick = () => selectOption(qId, option, card);
+
+          if (userAnswers[qId] === option) {
+            optionBtn.classList.add("option-selected");
+            card.classList.add("card-answered");
+          }
+
+          optionsDiv.appendChild(optionBtn);
+        });
+
+        card.appendChild(optionsDiv);
+        return card;
+      }
+
+      /**
+       * Creates an individual question card element for the Review View.
+       */
+      function createReviewCard(q, index) {
+        const qId = q.id;
+        const displayNum = index + 1;
+        const userAnswer = userAnswers[qId];
+        const isCorrect = userAnswer === q.answer;
+
+        const card = document.createElement("div");
+        card.className =
+          "review-card bg-white p-6 rounded-2xl shadow-xl border border-gray-100 transition duration-300";
+
+        const heading = document.createElement("h3");
+        heading.className =
+          "text-base font-semibold text-indigo-500 mb-4 border-b border-indigo-100 pb-2";
+        heading.textContent = `Question ${displayNum} of ${TOTAL_QUESTIONS}`;
+        card.appendChild(heading);
+
+        const text = document.createElement("p");
+        text.className =
+          "text-xl md:text-2xl font-extrabold text-gray-800 mb-6 leading-relaxed";
+        text.textContent = `${displayNum}. ${q.question}`;
+        card.appendChild(text);
+
+        const optionsDiv = document.createElement("div");
+        optionsDiv.className = "space-y-4";
+
+        q.options.forEach((option) => {
+          const optionBtn = document.createElement("div");
+          optionBtn.textContent = option;
+          optionBtn.className =
+            "w-full text-left p-4 border-2 border-gray-300 rounded-xl text-gray-700 font-medium transition duration-150 shadow-sm";
+
+          if (option === q.answer) {
+            // Correct: Green
+            optionBtn.classList.add("option-correct");
+          } else if (option === userAnswer && !isCorrect) {
+            // Wrong Answer: Blue (Replaced Red)
+            optionBtn.classList.add("option-wrong");
+          }
+
+          optionsDiv.appendChild(optionBtn);
+        });
+
+        const footer = document.createElement("div");
+        footer.className = "mt-4 pt-3 border-t-2 font-bold";
+
+        if (isCorrect) {
+          footer.className += " text-green-600 border-green-100";
+          footer.innerHTML = `<i class="fas fa-check-circle mr-2"></i> Result: <span class="uppercase">Correct!</span>`;
+        } else if (userAnswer) {
+          // Wrong: Blue (Replaced Red)
+          footer.className += " text-sky-600 border-sky-100";
+          footer.innerHTML = `<i class="fas fa-times-circle mr-2"></i> Result: <span class="uppercase">Wrong!</span> <br> <span class="text-sm text-gray-600 font-normal">Your selection was highlighted in blue. The correct answer is in green.</span>`;
+        } else {
+          // Unanswered: Amber
+          footer.className += " text-amber-600 border-amber-100";
+          footer.innerHTML = `<i class="fas fa-question-circle mr-2"></i> Result: <span class="uppercase">Unanswered.</span> <br> <span class="text-sm text-gray-600 font-normal">The correct answer is highlighted in green.</span>`;
+        }
+
+        card.appendChild(optionsDiv);
+        card.appendChild(footer);
+        return card;
+      }
+
+      function renderAllQuestions() {
+        questionsListContainer.innerHTML = "";
+        questions.forEach((q, index) => {
+          const card = createQuestionCard(q, index);
+          questionsListContainer.appendChild(card);
+        });
+      }
+
+      function renderNavigator() {
+        navigatorGridDesktop.innerHTML = "";
+        navigatorGridMobile.innerHTML = "";
+        let answeredCount = 0;
+
+        questions.forEach((q) => {
+          const qId = q.id;
+          const isAnswered = !!userAnswers[qId];
+          const displayNum = q.id;
+
+          if (isAnswered) {
+            answeredCount++;
+          }
+
+          let bgColor;
+          let textColor = "text-white";
+
+          if (isAnswered) {
+            bgColor = "bg-emerald-500";
+          } else {
+            bgColor = "bg-gray-400";
+          }
+
+          const buttonClass = `p-2 rounded-lg text-sm font-bold transition-all duration-150 text-center shadow-sm hover:shadow-md ${bgColor} ${textColor} hover:bg-opacity-90`;
+
+          const btn = document.createElement("a");
+          btn.textContent = displayNum;
+          btn.className = buttonClass;
+          btn.href = `#q-${qId}`;
+
+          const btnMobile = btn.cloneNode(true);
+          btnMobile.onclick = () => {
+            setTimeout(() => toggleMobileNavigator(false), 50);
+          };
+
+          navigatorGridDesktop.appendChild(btn);
+          navigatorGridMobile.appendChild(btnMobile);
+        });
+
+        mobileQAnswered.textContent = answeredCount;
+      }
+
+      /**
+       * Stores the user's selected option and updates the UI for that card.
+       */
+      function selectOption(qId, optionValue, cardElement) {
+        userAnswers[qId] = optionValue;
+
+        const optionsContainer = cardElement.querySelector(".space-y-4");
+        const buttons = optionsContainer.querySelectorAll("button");
+
+        buttons.forEach((btn) => btn.classList.remove("option-selected"));
+        const selectedButton = Array.from(buttons).find(
+          (btn) => btn.textContent === optionValue
+        );
+        if (selectedButton) {
+          selectedButton.classList.add("option-selected");
+        }
+
+        cardElement.classList.add("card-answered");
+        renderNavigator();
+      }
+
+      /**
+       * Calculates the final score and displays the result view.
+       */
+      function submitTest() {
+        let correctAnswers = 0;
+        let answeredCount = 0;
+
+        questions.forEach((q) => {
+          const answer = userAnswers[q.id];
+          if (answer) {
+            answeredCount++;
+            if (answer === q.answer) {
+              correctAnswers++;
+            }
+          }
+        });
+
+        const wrongAnswers = answeredCount - correctAnswers;
+        const unansweredQuestions = TOTAL_QUESTIONS - answeredCount;
+
+        // Store metrics for the review view
+        resultMetrics = {
+          correct: correctAnswers,
+          wrong: wrongAnswers,
+          unanswered: unansweredQuestions,
+        };
+
+        const percentage = (correctAnswers / TOTAL_QUESTIONS) * 100;
+        const isEligible = percentage >= PASS_THRESHOLD_PERCENTAGE;
+
+        // Update Result View Content
+        document.getElementById("final-candidate-name").textContent =
+          candidateName;
+        document.getElementById(
+          "final-percentage"
+        ).textContent = `${percentage.toFixed(1)}%`;
+        finalScoreMetricNum.textContent = correctAnswers;
+
+        const resultView = views.result;
+        const resultTitle = document.getElementById("result-title");
+
+        // Apply Pass/Fail Styling (Green for Pass, Amber/Orange for Fail)
+        resultView.classList.remove("pass", "fail");
+        singleScoreBox.classList.remove("pass", "fail");
+        resultTitle.classList.remove("text-green-700", "text-amber-700"); // Clean up old colors
+        resultView.style.borderColor = "";
+
+        if (isEligible) {
+          // PASS: Green
+          resultTitle.textContent = "Congratulations! Eligible";
+          resultView.style.borderColor = `#10b981`; // Green border
+          resultTitle.classList.add("text-green-700"); // Green Text
+          singleScoreBox.classList.add("pass");
+          statusIcon.className = "fas fa-check-circle mb-4 text-6xl opacity-90"; // Green check icon
+        } else {
+          // FAIL: Amber/Orange (Replaced Red)
+          resultTitle.textContent = "Not Eligible";
+          resultView.style.borderColor = `#d97706`; // Amber border
+          resultTitle.classList.add("text-amber-700"); // Amber Text
+          singleScoreBox.classList.add("fail");
+          statusIcon.className = "fas fa-times-circle mb-4 text-6xl opacity-90"; // Neutral/Dark icon in amber box
+        }
+
+        showView("result");
+      }
+
+      /**
+       * Renders the review view, showing the score breakdown and question-by-question results.
+       */
+      function reviewAnswers() {
+        // 1. Populate the score breakdown metrics
+        finalCorrectElement.textContent = resultMetrics.correct;
+        finalWrongElement.textContent = resultMetrics.wrong;
+        finalUnansweredElement.textContent = resultMetrics.unanswered;
+
+        // 2. Render the full review cards
+        const reviewContainer = document.getElementById(
+          "review-questions-container"
+        );
+        reviewContainer.innerHTML = "";
+
+        questions.forEach((q, index) => {
+          const card = createReviewCard(q, index);
+          reviewContainer.appendChild(card);
+        });
+
+        // 3. Switch to the review view
+        showView("review");
+      }
+
+      function resetApp() {
+        userAnswers = {};
+        candidateName = "";
+        nameInput.value = "";
+        showView("login");
+      }
+
+      document.addEventListener("DOMContentLoaded", initApp);
+    </script>
+  </body>
+</html>
